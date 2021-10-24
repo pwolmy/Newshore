@@ -1,0 +1,437 @@
+﻿@page
+@model NewshoreModel
+@{
+    ViewData["Title"] = "Newshore";
+    Layout = "~/Pages/Shared/_LayoutNewshore.cshtml";
+}
+<h1>@ViewData["Title"]</h1>
+
+
+<div class="container">
+
+    <form class="form-inline">
+        <div class="form-group">
+            <label for="origin">Origin</label>
+            <select class="form-control" id="origin" required>
+                <option value="0">Select Origin</option>
+                <option value="MDE">MDE - Medellín</option>
+                <option value="BOG">BOG - Bogotá</option>
+                <option value="CTG">CTG - Cartagena</option>
+                <option value="PEI">PEI - Pereira</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="destination">Destination</label>
+            <select class="form-control" id="destination" required>
+                <option value="0">Select Destination</option>
+                <option value="MDE">MDE - Medellín</option>
+                <option value="BOG">BOG - Bogotá</option>
+                <option value="CTG">CTG - Cartagena</option>
+                <option value="PEI">PEI - Pereira</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="depart">Depart</label>
+            <div class="input-group">
+                <input id="dateDepart" name="date" type="text" onfocus="(this.type='date')" onfocusout="(this.type='text')" class="form-control" required>
+                <div class="input-group-addon">#</div>
+            </div>
+        </div>
+
+
+        @*<button type="submit" class="btn btn-info btn-lg" id="btnSearchFlight">BOOK YOUR TRIP</button>*@
+        <button type="button" class="btn btn-info btn-lg" id="btnSearchFlight">BOOK YOUR TRIP</button>
+
+    </form>
+
+    <!--
+    <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#bookTicket" style="visibility:hidden">BOOK YOUR TRIP (modal)</button>
+    -->
+
+    <div id="bookTicket" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <!--
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">BOOK YOUR TRIP</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <div layout="column">
+                            <div layout="row flex">
+                                <div class="btn-group">
+                                    <label class="radio-inline"><input type="radio" name="round" value="roundTrip" checked="checked">Round trip</label>
+                                    <label class="radio-inline"><input type="radio" name="round" value="oneWay">One way</label>
+                                </div>
+                            </div>
+
+                            <div layout="row" flex>
+                                <div class="form-group" flex="45">
+                                    <label for="origin">Origin</label>
+                                    <select class="form-control" id="origin">
+                                        <option>1</option>
+                                    </select>
+                                </div>
+                                <div flex="10"></div>
+                                <div class="form-group" flex="45">
+                                    <label for="destination">Destination</label>
+                                    <select class="form-control" id="destination">
+                                        <option>1</option>
+                                        <option>2</option>
+                                        <option>3</option>
+                                        <option>4</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div layout="row" flex>
+                                <div class="form-group" flex="45">
+                                    <label for="depart">Depart</label>
+                                    <input id="dateDepart" name="date" type="text" onfocus="(this.type='date')" onfocusout="(this.type='text')" class="form-control">
+                                </div>
+                                <div flex="10"></div>
+                                <div id="return" class="form-group" flex="45">
+                                    <label for="return">Return</label>
+                                    <input id="dateReturn" name="date" type="text" onfocus="(this.type='date')" onfocusout="(this.type='text')" class="form-control">
+                                </div>
+                            </div>
+
+                            <div layout="row" flex>
+                                <div class="form-group" flex="20">
+                                    <label for="adult">Adult (>=12)</label>
+                                    <select class="form-control" id="adult">
+                                        <option>1</option>
+                                        <option>2</option>
+                                        <option>3</option>
+                                        <option>4</option>
+                                    </select>
+                                </div>
+                                <div flex="5"></div>
+                                <div class="form-group" flex="20">
+                                    <label for="children-less-2">Infant</label>
+                                    <select class="form-control" id="children-less-2">
+                                        <option>1</option>
+                                        <option>2</option>
+                                        <option>3</option>
+                                        <option>4</option>
+                                    </select>
+                                </div>
+                                <div flex="5"></div>
+                                <div class="form-group" flex="20">
+                                    <label for="children-more-2">Children (2->12)</label>
+                                    <select class="form-control" id="children-more-2">
+                                        <option>1</option>
+                                        <option>2</option>
+                                        <option>3</option>
+                                        <option>4</option>
+                                    </select>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button id="btnSearchFlight" type="button" class="btn btn-default" data-dismiss="modal">Search Flight</button>
+                </div>
+            </div>
+            -->
+        </div>
+    </div>
+
+    <table class="table table-hover" id="grid"></table>
+    <br /><br />
+    <div id="divResponse"></div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+
+        var arrayVuelos = new Array();
+
+        $("#btnSearchFlight").click(function () {
+            //POST();
+            arrayVuelos = [];
+            //GET();
+            //POST();
+            submitData();
+        });
+
+
+
+
+        function submitData() {
+            //const data = getData();
+            const data = "{\"Origin\": \"BOG\",\"Destination\": \"CTG\",\"From\": \"2021-11-21\"}";
+
+            //if (!validateData(data)) {
+            //    return;
+            //}
+
+            const fetchData = {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    "Content-Type": "application/json;charset=utf-8"
+                }
+            }
+
+            displayMessage("With a moment please...");
+            fetch('http://localhost:24637/api/Newshore', fetchData)
+                .then(response => response.json())
+                .then(response => {
+                    if (!response) {
+                        displayApiError("No response from API");
+                        return;
+                    }
+                    if (response.errors) {
+                        displayApiError(response.errors);
+                        return;
+                    }
+                    displayApiResponse(response.rovers);
+                })
+                .catch(error => {
+                    displayApiError(error);
+                });
+        }
+
+        //display the Web API response inside a div
+        function displayApiError(error) {
+            let message = "";
+            if (typeof (error) == "object") {
+                let errors;
+                for (const key in error) {
+                    errors = (typeof (error[key]) == "array") ? error[key].join(";") : error[key];
+                    message += `${key}: ${errors}<br />`;
+                }
+            }
+            else {
+                message = error;
+            }
+            document.getElementById("divResponse").innerHTML = `<span style="color: red">${message}</span>`;
+        }
+
+        function displayMessage(message) {
+            document.getElementById("divResponse").innerHTML = message;
+        }
+
+        function POST() {
+            var dataToSend = "{\"Origin\": \"BOG\",\"Destination\": \"CTG\",\"From\": \"2021-11-21\"}"
+
+            
+            $.ajax({
+                url: 'http://localhost:24637/api/Newshore',
+                dataType: 'json',
+                crossDomain: true,
+                async: true,
+
+                method: "POST",
+                data: dataToSend,
+                //data: JSON.stringify(dataToSend),
+                processData: false,
+
+                //contentType: "application/json",
+
+
+
+
+                succes: function (data) {
+                    alert('Success!');
+
+                },
+                error: function (request, msg, error) {
+                    alert('Error!' + msg + error);
+                }
+            });
+        }
+
+        /*
+        function POST() {
+            var dataToSend = {}
+            dataToSend["Origin"] = $("#origin").val();
+            dataToSend["Destination"] = $("#destination").val();
+            dataToSend["From"] = $("#dateDepart").val();
+
+            var settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "http://localhost:24637/api/Newshore",
+                "method": "POST",
+                //"Content-Type": "application/json",
+                "processData": false,
+                "dataType": "json",
+                "data": "{\"Origin\": \"BOG\",\"Destination\": \"CTG\",\"From\": \"2021-11-21\"}"
+                //"data": JSON.stringify(dataToSend)
+            }
+            console.log(JSON.stringify(dataToSend));
+            
+            //"Accept": "application/json",
+            
+
+            $.ajax(settings).done(function (response) {
+                console.log(response);
+                PopulateTable(response);
+            });
+        }
+        */
+        
+        function GET() {
+
+            var settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "http://localhost:24637/api/Newshore",
+                "method": "GET",
+                
+                "processData": false,
+                "data": ""
+            }
+
+            $.ajax(settings).done(function (response) {
+                
+                PopulateTable(response);
+            });
+        }
+        
+
+        function PopulateTable(data) {
+            $("#grid").empty();
+            var $grid = $("#grid");
+            var $thead = $("<thead></thead>");
+            var $trHead = $("<tr></tr>");
+
+            
+            $trHead.append("<th>Origen</th>");
+            $trHead.append("<th>Destino</th>");
+            $trHead.append("<th>Fecha</th>");
+            $trHead.append("<th>Precio</th>");
+            $trHead.append("<th>Modena</th>");
+            $trHead.append("<th>Vuelo</th>");
+            $trHead.append("<th></th>");
+
+            $grid.append($thead.append($trHead));
+
+            $.each(data, function (idx, item) {
+                
+                //console.log(item);
+                arrayVuelos[idx] = item;
+                
+                var $tbody = $("<tbody></tbody>");
+                var $trBody = $("<tr></tr>");
+                $trBody.append("<td>" + item.departureStation + "</td>");
+                $trBody.append("<td>" + item.arrivalStation + "</td>");
+                $trBody.append("<td>" + $.date(item.departureDate) + "</td>");
+                $trBody.append("<td>" + item.price + "</td>");
+                $trBody.append("<td>" + item.currency + "</td>");
+                $trBody.append("<td>" + item.flightNumber + "</td>");
+                $trBody.append("<td><a id=" + idx + " href=\"#\" onClick=\"AddFlight(" + idx + ");return false\" >Agregar</a></td>")
+
+                $grid.append($tbody.append($trBody));
+            });
+        }
+
+
+        function AddFlight(idx) {
+            console.log(arrayVuelos[idx]);
+            //var dataToSend = "{\"Origin\": \"BOG\",\"Destination\": \"CTG\",\"From\": \"2021-11-20\"}";
+            //var dataToSend = "{\"departureDate\": \"2021-12-20T04:50:00\",\"departureStation\": \"BOG\",\"arrivalStation\": \"MED\",\"price\": 151905,\"currency\": \"COP\",\"flightNumber\": \"5818\"}";
+
+            var settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "http://localhost:24637/api/FlightDTOs",
+                "method": "POST",
+                "headers": {
+                    "Content-Type": "application/json",
+                    "cache-control": "no-cache",
+                    "Postman-Token": "7c18326e-a98e-4680-b02f-c347369d9347"
+                },
+                "processData": false,
+                "data": "{\r\n    \"departureDate\": \"2021-12-20T04:50:00\",\r\n    \"departureStation\": \"BOG\",\r\n    \"arrivalStation\": \"MED\",\r\n    \"price\": 151905,\r\n    \"currency\": \"COP\",\r\n    \"flightNumber\": \"5818\"\r\n  }"
+            }
+
+            $.ajax(settings).done(function (response) {
+                console.log(response);
+            });
+        };
+
+        $.date = function (dateObject) {
+            var d = new Date(dateObject);
+            var day = d.getDate();
+            var month = d.getMonth() + 1;
+            var year = d.getFullYear();
+            var time = d.getHours() + ":" + d.getMinutes();
+            var date = day + "/" + month + "/" + year + " " + time;
+
+            return date;
+        };
+
+        /*
+        function GET() {
+            console.log("ingresa al get");
+
+            $.ajax({
+                url: 'http://localhost:24637/api/Newshore',
+                type: "GET",
+
+                done: function (data) {
+                    console.log('Done!');
+                },
+
+                succes: function (data) {
+                    console.log('Success!');
+                },
+
+                error: function (request, msg, error) {
+                    console.log('Error!' + msg + error);
+                }
+            });
+
+            console.log("Fin get");
+        }
+
+        function POST() {
+            var dataToSend = "{\"Origin\": \"BOG\",\"Destination\": \"CTG\",\"From\": \"2021-11-20\"}";
+
+            $.ajax({
+                url: 'http://testapi.vivaair.com/otatest/api/values',
+                dataType: 'json',
+                crossDomain: true,
+                async: true,
+
+                method: "POST",
+                data: dataToSend,
+                //data: JSON.stringify(dataToSend),
+                processData: false,
+
+                //contentType: "application/json",
+
+
+
+
+                succes: function (data) {
+                    alert('Success!');
+
+                },
+                error: function (request, msg, error) {
+                    alert('Error!' + msg + error);
+                }
+            });
+
+        };
+
+        
+        */
+    </script>
+}
+
+

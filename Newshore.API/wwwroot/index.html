@@ -1,0 +1,272 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>NEWSHORE - DesafioTecnico</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
+    <link href="/css/style.css" rel="stylesheet" />
+</head>
+<body>
+
+    <div class="container-fluid">
+        <!--header-->
+        <div class="container-fluid header">
+            <image class="header-image" src="/images/plane.jpg">
+        </div>
+
+        <!--body-->
+        <div class="container">
+
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="origin">Origin</label>
+                    <select class="form-control" id="origin" required>
+                        <option value="">Select Origin</option>
+                        <option value="MDE">MDE - Medellín</option>
+                        <option value="BOG">BOG - Bogotá</option>
+                        <option value="CTG">CTG - Cartagena</option>
+                        <option value="PEI">PEI - Pereira</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="destination">Destination</label>
+                    <select class="form-control" id="destination" required>
+                        <option value="">Select Destination</option>
+                        <option value="MDE">MDE - Medellín</option>
+                        <option value="BOG">BOG - Bogotá</option>
+                        <option value="CTG">CTG - Cartagena</option>
+                        <option value="PEI">PEI - Pereira</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="depart">Depart</label>
+                    <div class="input-group">
+                        <input id="dateDepart" name="date" type="text" onfocus="(this.type='date')" onfocusout="(this.type='text')" class="form-control" required>
+                        <div class="input-group-addon">#</div>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-info btn-lg" id="btnSearchFlight">BOOK YOUR TRIP</button>
+
+            </form>
+
+
+            <table class="table table-hover" id="grid"></table>
+            <br /><br />
+            <div id="divResponse" ></div>
+        </div>
+
+    </div>
+
+
+    <script>
+
+        var arrayVuelos = new Array();
+
+        $("#btnSearchFlight").click(function () {
+            arrayVuelos = [];
+            PopulateTable();
+            submitData();
+        });
+
+
+        function submitData() {
+            const data = getData();
+            //console.log(data);
+
+            if (!validateData(data)) {
+                return;
+            }
+            
+            //console.log(JSON.stringify(data));
+
+            const fetchData = {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    "Content-Type": "application/json;charset=utf-8"
+                }
+            }
+
+            //console.log(fetchData);
+
+            displayMessage("With a moment please...");
+            fetch('api/Newshore', fetchData)
+                .then(response => response.json())
+                .then(response => {
+                    if (!response) {
+                        displayApiError("No response from API");
+                        return;
+                    }
+                    if (response.errors) {
+                        displayApiError(response.errors);
+                        return;
+                    }
+                    PopulateArray(response);
+                    displayMessage("");
+                })
+                .catch(error => {
+                    displayApiError(error);
+                });
+
+            
+        }
+
+        //display the Web API response inside a div
+        function displayApiError(error) {
+            let message = "";
+            if (typeof (error) == "object") {
+                let errors;
+                for (const key in error) {
+                    errors = (typeof (error[key]) == "array") ? error[key].join(";") : error[key];
+                    message += `${key}: ${errors}<br />`;
+                }
+            }
+            else {
+                message = error;
+            }
+            document.getElementById("divResponse").innerHTML = '<span style="color: red">${message}</span>';
+        }
+
+        function displayMessage(message) {
+            document.getElementById("divResponse").innerHTML = '<div class="alert alert-primary" role="alert">' + message + '</div>';
+        }
+
+        //gets dta to be sent to API
+        function getData() {
+            const form = document.forms[0];
+            return {
+                "Origin": form["origin"].value,
+                "Destination": form["destination"].value,
+                "From": form["dateDepart"].value
+            };
+        }
+
+        //validates rover instructions
+        function validateData(data) {
+            if (data.Origin == "" || data.Destination == "") {
+                alert("Origin and Destination are Requerid");
+                return false;
+            }
+
+            if (data.Origin == data.Destination) {
+                alert("Origin and Destination can't by the same");
+                return false;
+            }
+            if (data.From == "") {
+                alert("Depart Date are Requerid");
+                return false;
+            }
+
+            if (!isDateAfterToday(data.From)) {
+                alert("Depart Date have to be After today");
+                return false;
+            }
+            
+
+            return true;
+        }
+
+        function isDateAfterToday(date) {
+            return new Date(date).valueOf() > new Date().valueOf();
+        }
+
+        function PopulateArray(data) {
+            $.each(data, function (idx, item) {
+                arrayVuelos[idx] = item;
+            });
+
+            PopulateTable();
+        }
+
+
+        function PopulateTable() {
+            $("#grid").empty();
+            var $grid = $("#grid");
+
+            if (arrayVuelos.length > 0) {
+                var $thead = $("<thead></thead>");
+                var $trHead = $("<tr></tr>");
+
+
+                $trHead.append("<th>Origen</th>");
+                $trHead.append("<th>Destino</th>");
+                $trHead.append("<th>Fecha</th>");
+                $trHead.append("<th>Precio</th>");
+                $trHead.append("<th>Modena</th>");
+                $trHead.append("<th>Vuelo</th>");
+                $trHead.append("<th></th>");
+
+                $grid.append($thead.append($trHead));
+
+                $.each(arrayVuelos, function (idx, item) {
+
+                    var $tbody = $("<tbody></tbody>");
+                    var $trBody = $("<tr></tr>");
+                    $trBody.append("<td>" + item.departureStation + "</td>");
+                    $trBody.append("<td>" + item.arrivalStation + "</td>");
+                    $trBody.append("<td>" + $.date(item.departureDate) + "</td>");
+                    $trBody.append("<td>" + item.price + "</td>");
+                    $trBody.append("<td>" + item.currency + "</td>");
+                    $trBody.append("<td>" + item.flightNumber + "</td>");
+                    $trBody.append("<td><a id=" + idx + " href=\"#\" onClick=\"AddFlight(" + idx + ");return false\" >Agregar</a></td>")
+
+                    $grid.append($tbody.append($trBody));
+                });
+            }
+            
+        }
+
+
+        function AddFlight(idx) {
+            console.log(arrayVuelos[idx]);
+
+            var settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "api/FlightDTOs",
+                "method": "POST",
+                "headers": {
+                    "Content-Type": "application/json",
+                    "cache-control": "no-cache",
+                    "Postman-Token": "7c18326e-a98e-4680-b02f-c347369d9347"
+                },
+                "processData": false,
+                "data": JSON.stringify(arrayVuelos[idx])
+            }
+
+            $.ajax(settings)
+                .done(function (response) {
+                    arrayVuelos.splice(idx, 1);                    
+                    alert('Flight saved!')
+                    PopulateTable();
+                })
+                .fail(function () {
+                    alert("Error!!");
+                })
+                
+                ;
+        };
+
+        $.date = function (dateObject) {
+            var d = new Date(dateObject);
+            var day = d.getDate();
+            var month = d.getMonth() + 1;
+            var year = d.getFullYear();
+            var time = d.getHours() + ":" + d.getMinutes();
+            var date = day + "/" + month + "/" + year + " " + time;
+
+            return date;
+        };
+
+        
+    </script>
+
+</body>
+</html>
