@@ -1,10 +1,14 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace Newshore.API.DTOs
 {
     public class FlightDTO
     {
+        
         public DateTime DepartureDate { get; set; }
+
+        [Required]
         public string DepartureStation { get; set; }
         public string ArrivalStation { get; set; }
 
